@@ -10,7 +10,7 @@
 
 typedef struct{
   char message[32];
-  int status;
+  int flag;
 } data;
 
 int main(int argc, char ** argv)
@@ -34,19 +34,20 @@ if(strcmp(connectionType, "s") == 0)
 			return -1;
 		}
     waitingForMessage = shmat(shmid, (void *)0, 0);
-
     if (waitingForMessage == (data *)(-1))
     {
       perror("shmat");
       exit(1);
     }
+    waitingForMessage->flag = 0;
 
-    while(!waitingForMessage->status)
+    while(1)
     {
-      if(waitingForMessage->status)
+      if(waitingForMessage->flag)
       {
-        printf("In server: %s", waitingForMessage->message);
-        waitingForMessage->status = 1;
+        printf("Message from client: %s", waitingForMessage->message);
+        waitingForMessage->flag = 0;
+        break;
       }
 
     }
@@ -59,13 +60,12 @@ if(strcmp(connectionType, "s") == 0)
 	}
 	else if(strcmp(connectionType, "c") == 0)
 	{
-		printf("Client!\n");
-	  size_t size = 1024;
+		printf("Client!\nMessage to send to server: ");
     key_t key = 99;
 		int shmid;
 		data *prepareData;
 
-	  if((shmid = shmget(key, size, 0644 | IPC_CREAT)) < 0)
+	  if((shmid = shmget(key, SHM_SIZE, 0644 | IPC_CREAT)) < 0)
 		{
 			printf("SHMGET IS WRONG!!!\n");
 			return -1;
@@ -79,7 +79,6 @@ if(strcmp(connectionType, "s") == 0)
       exit(1);
     }
     char c = ' ';
-    int sizeOfString = 20;
     int charIndex = 0;
     while(c != '\n')
     {
@@ -87,7 +86,7 @@ if(strcmp(connectionType, "s") == 0)
       prepareData->message[charIndex] = c;
       charIndex++;
     }
-    prepareData->status = 1;
+    prepareData->flag = 1;
   }
 
 
