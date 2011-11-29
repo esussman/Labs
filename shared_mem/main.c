@@ -25,7 +25,8 @@ if(strcmp(connectionType, "s") == 0)
 	{
 		printf("Server!\n");
 		key_t key = 99;
-      int shmid;
+    int shmid;
+
 		data *waitingForMessage;
 
     if((shmid = shmget(key, SHM_SIZE, 0644 | IPC_CREAT)) < 0)
@@ -61,7 +62,8 @@ if(strcmp(connectionType, "s") == 0)
 	else if(strcmp(connectionType, "c") == 0)
 	{
 		printf("Client!\nMessage to send to server: ");
-    	key_t key = 99;
+
+    key_t key = 99;
 		int shmid;
 		data *prepareData;
 
