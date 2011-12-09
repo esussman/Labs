@@ -37,18 +37,15 @@ int forkChildren(int i, int shmid, int p)
 				exit(1);
 			}
       printf("Process %d, me = %d, next = %d\n", i, me, next);
-			while(1)
+			while(counter != turnController->maxTurns)
 			{
         sem_wait(&turnController->semArray[me]);
 				counter = counter + 1;
 				printf("Process %d completed %d turns\n", me, counter);
         sem_post(&turnController->semArray[next]);
-				if(counter == turnController->maxTurns)
-				{
-					printf("Process %d finished\n", me);
-					exit(0);
-				}
 			}
+			printf("Process %d finished\n", me);
+			exit(0);
 	}
 	else
 	{
