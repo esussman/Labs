@@ -1,0 +1,6 @@
+all: main.o 
+	gcc -g main.c -o assignment3 -lrt
+	
+clean:
+	rm -f *.o *.txt exec partb parta
+
