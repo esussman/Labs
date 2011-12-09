@@ -4,6 +4,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/time.h>
+#include <sys/wait.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <semaphore.h>
@@ -16,6 +18,15 @@ typedef struct{
   int maxTurns;
   sem_t semArray[];
 } data;
+int delete_sharedmem(int shmid)
+{
+ 	if( shmctl(shmid, IPC_RMID, NULL) == -1)
+   {
+		perror("shmctl");
+		return -1;
+   }
+	return 0;
+}
 int forkChildren(int i, int shmid, int p)
 {
 	int pid = fork();
@@ -36,13 +47,15 @@ int forkChildren(int i, int shmid, int p)
 				delete_sharedmem(shmid);
 				exit(1);
 			}
-      printf("Process %d, me = %d, next = %d\n", i, me, next);
 			while(counter != turnController->maxTurns)
 			{
-        sem_wait(&turnController->semArray[me]);
+        			sem_wait(&turnController->semArray[me]);
+				struct timeval time;
+				gettimeofday(&time, NULL);
+			 	printf("%ld", time->tv_usec);
 				counter = counter + 1;
 				printf("Process %d completed %d turns\n", me, counter);
-        sem_post(&turnController->semArray[next]);
+        			sem_post(&turnController->semArray[next]);
 			}
 			printf("Process %d finished\n", me);
 			exit(0);
@@ -68,21 +81,13 @@ void init_sems(int shmid, int numProcess)
 		sem_init(&setSemaphores->semArray[i], 1, 0);
 
 }
-int delete_sharedmem(int shmid)
-{
- 	if( shmctl(shmid, IPC_RMID, NULL) == -1)
-   {
-		perror("shmctl");
-		return -1;
-   }
-	return 0;
-}
 int main(int argc, char ** argv)
 {
 	int p = atoi(argv[1]);
+	int *pidArr = malloc(sizeof(int)*p);
 	int n = atoi(argv[2]);
 	key_t key = 39;
-  int shmid;
+	int shmid;
 	data *turnController;
 	if(argc != 3)
 	{
@@ -106,11 +111,11 @@ int main(int argc, char ** argv)
 	turnController->maxTurns = n;
 	init_sems(shmid, p);
   int i = 0;
-  int waitLastChild;
   for(i = 0; i < p; i++)
-    waitLastChild = forkChildren(i, shmid, p);
+    pidArr[i] = forkChildren(i, shmid, p);
 
-  waitpid(waitLastChild, NULL, 0);
+  for(i = 0; i < p; i++)
+  	waitpid(pidArr[i], NULL, 0);
   delete_sharedmem(shmid);
   return 0;
 }

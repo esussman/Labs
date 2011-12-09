@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <pthread.h>
@@ -15,6 +16,15 @@ typedef struct{
   int turn;
   int maxTurns;
 } data;
+int delete_sharedmem(int shmid)
+{
+ 	if( shmctl(shmid, IPC_RMID, NULL) == -1) 
+   {                 
+		perror("shmctl");
+		return -1;
+   }  
+	return 0;
+}
 int forkChildren(int i, int shmid, int p)
 {
 	int pid = fork();
@@ -52,15 +62,6 @@ int forkChildren(int i, int shmid, int p)
 	{
 		return pid;
 	}
-}
-int delete_sharedmem(int shmid)
-{
- 	if( shmctl(shmid, IPC_RMID, NULL) == -1) 
-   {                 
-		perror("shmctl");
-		return -1;
-   }  
-	return 0;
 }
 int main(int argc, char ** argv)
 {
