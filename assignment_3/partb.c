@@ -52,12 +52,12 @@ int forkChildren(int i, int shmid, int p)
         			sem_wait(&turnController->semArray[me]);
 				struct timeval time;
 				gettimeofday(&time, NULL);
-			 	printf("%ld", time->tv_usec);
+			 	printf("%ld\n",(time.tv_sec*1000000)+time.tv_usec);
 				counter = counter + 1;
-				printf("Process %d completed %d turns\n", me, counter);
+			//	printf("Process %d completed %d turns\n", me, counter);
         			sem_post(&turnController->semArray[next]);
 			}
-			printf("Process %d finished\n", me);
+			//printf("Process %d finished\n", me);
 			exit(0);
 	}
 	else
