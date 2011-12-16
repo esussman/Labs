@@ -49,15 +49,15 @@ int forkChildren(int i, int shmid, int p)
 			}
 			while(counter != turnController->maxTurns)
 			{
-        			sem_wait(&turnController->semArray[me]);
+        		sem_wait(&turnController->semArray[me]);
 				struct timeval time;
 				gettimeofday(&time, NULL);
-			 	printf("%ld\n",(time.tv_sec*1000000)+time.tv_usec);
+			 	//printf("%ld\n",(time.tv_sec*1000000)+time.tv_usec);
 				counter = counter + 1;
-			//	printf("Process %d completed %d turns\n", me, counter);
+				printf("Process %d completed %d turns\n", me, counter);
         			sem_post(&turnController->semArray[next]);
 			}
-			//printf("Process %d finished\n", me);
+//			printf("Process %d finished\n", me);
 			exit(0);
 	}
 	else
@@ -83,6 +83,11 @@ void init_sems(int shmid, int numProcess)
 }
 int main(int argc, char ** argv)
 {
+
+	//struct timeval time;
+	//gettimeofday(&time, NULL);
+	//printf("%ld\n",(time.tv_sec*1000000)+time.tv_usec);
+	
 	int p = atoi(argv[1]);
 	int *pidArr = malloc(sizeof(int)*p);
 	int n = atoi(argv[2]);
@@ -117,5 +122,8 @@ int main(int argc, char ** argv)
   for(i = 0; i < p; i++)
   	waitpid(pidArr[i], NULL, 0);
   delete_sharedmem(shmid);
+
+	//gettimeofday(&time, NULL);
+	//printf("%ld\n",(time.tv_sec*1000000)+time.tv_usec);
   return 0;
 }

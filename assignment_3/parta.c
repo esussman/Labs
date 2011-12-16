@@ -1,3 +1,4 @@
+#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +33,7 @@ int forkChildren(int i, int shmid, int p)
 	{
 			int me = i;
 			int counter = 0;
+			struct timeval time;
 			int next = 0;
 			if(i == p)
 				next = 1;
@@ -50,10 +52,12 @@ int forkChildren(int i, int shmid, int p)
 				while(turnController->turn != me);
 				counter = counter + 1;
 				printf("Process %d completed %d turns\n", me, counter);
+                                gettimeofday(&time, NULL);
+				//printf("%ld\n",((time.tv_sec)*1000000)+time.tv_usec);
 				turnController->turn = next;
 				if(counter == turnController->maxTurns)
 				{
-					printf("Process %d finished\n", me);
+//					printf("Process %d finished\n", me);
 					exit(0);
 				}
 			}
@@ -65,6 +69,9 @@ int forkChildren(int i, int shmid, int p)
 }
 int main(int argc, char ** argv)
 {
+
+	struct timeval time;
+        gettimeofday(&time, NULL);
 	int p = atoi(argv[1]);
 	int n = atoi(argv[2]);
 	key_t key = 99;
@@ -96,5 +103,11 @@ int main(int argc, char ** argv)
   
   	waitpid(waitLastChild, NULL, 0);
    delete_sharedmem(shmid);
+	
+	struct timeval endTime;
+        gettimeofday(&endTime, NULL);
+
+	//printf("%ld\n",((time.tv_sec)*1000000)+time.tv_usec);
+	//printf("%ld\n",((endTime.tv_sec)*1000000)+endTime.tv_usec);
   return 0;
 }
